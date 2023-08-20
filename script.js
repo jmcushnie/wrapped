@@ -1,21 +1,26 @@
-import "./style.css";
+const clientId = process.env.CLIENT_ID;
+const code = undefined;
 
-document.querySelector("#app").innerHTML = `
-  <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="${viteLogo}" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">
-      <img src="${javascriptLogo}" class="logo vanilla" alt="JavaScript logo" />
-    </a>
-    <h1>Hello Vite!</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite logo to learn more
-    </p>
-  </div>
-`;
+if (!code) {
+  redirectToAuthCodeFlow(clientId);
+} else {
+  const accessToken = await getAccessToken(clientId, code);
+  const profile = await fetchProfile(accessToken);
+  populateUI(profile);
+}
 
-setupCounter(document.querySelector("#counter"));
+async function redirectToAuthCodeFlow(clientId) {
+  // TODO: Redirect to Spotify authorization page
+}
+
+async function getAccessToken(clientId, code) {
+  // TODO: Get access token for code
+}
+
+async function fetchProfile(token) {
+  // TODO: Call Web API
+}
+
+function populateUI(profile) {
+  // TODO: Update UI with profile data
+}
