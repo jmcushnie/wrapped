@@ -4,11 +4,19 @@ const code = params.get("code");
 
 console.log(clientId);
 if (!code) {
+  console.log(
+    "No authorization code found. Redirecting to authorization flow."
+  );
   redirectToAuthCodeFlow(clientId);
 } else {
-  const accessToken = await getAccessToken(clientId, code);
-  const profile = await fetchProfile(accessToken);
-  populateUI(profile);
+  try {
+    const accessToken = await getAccessToken(clientId, code);
+    const profile = await fetchProfile(accessToken);
+    console.log("Access Token:", accessToken);
+    console.log("User Profile:", profile);
+  } catch (error) {
+    console.error("Error:", error);
+  }
 }
 
 // Authorisation code flow Spotify using PKCE
@@ -70,14 +78,14 @@ export async function getAccessToken(clientId, code) {
   });
 
   const { access_token } = await result.json();
-  console.log(access_token);
   return access_token;
 }
 
 async function fetchProfile(token) {
-  // TODO: Call Web API
-}
+  const result = await fetch("https://api.spotify.com/v1/me", {
+    method: "GET",
+    headers: { Authorization: `Bearer ${token}` },
+  });
 
-function populateUI(profile) {
-  // TODO: Update UI with profile data
+  return await result.json();
 }
