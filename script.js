@@ -19,6 +19,7 @@ if (!code) {
     await fetchTopArtists(accessToken, timeRange);
     await fetchTopSongs(accessToken, timeRange);
     await updateTopGenreUI(accessToken, timeRange);
+    await fetchTop5Songs(accessToken, timeRange);
   } catch (error) {
     console.error("Error:", error);
   }
@@ -167,6 +168,52 @@ async function fetchTopSongs(token, timeRange) {
     return topSongs;
   } catch (error) {
     console.error("Error fetching top tracks:", error);
+    return [];
+  }
+}
+
+//Fetch top 5 songs
+async function fetchTop5Songs(token, timeRange) {
+  try {
+    const result = await fetch(
+      `https://api.spotify.com/v1/me/top/tracks?time_range=${timeRange}&limit=5`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    const top5Songs = await result.json();
+    console.log(`Top 5 Songs (${timeRange}):`, top5Songs);
+
+    if (top5Songs.items.length > 0) {
+      const top5SongList = document.getElementById("top-5-song-list");
+      top5SongList.innerHTML = ""; // Clear previous content
+
+      top5Songs.items.forEach((song, index) => {
+        const trackName = song.name;
+        const artistName = song.artists[0].name;
+        const trackImage = song.album.images[0]?.url;
+
+        const listItem = document.createElement("li");
+        const imageElement = document.createElement("img");
+        imageElement.src = trackImage;
+        imageElement.alt = `${trackName} by ${artistName}`;
+        listItem.appendChild(imageElement);
+
+        const textElement = document.createElement("p");
+        textElement.textContent = `${index + 1}. ${trackName} by ${artistName}`;
+        listItem.appendChild(textElement);
+
+        top5SongList.appendChild(listItem);
+      });
+    } else {
+      console.log("No top tracks found for the specified time range.");
+    }
+
+    return top5Songs;
+  } catch (error) {
+    console.error("Error fetching top 5 tracks:", error);
     return [];
   }
 }
