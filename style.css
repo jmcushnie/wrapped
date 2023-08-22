@@ -51,11 +51,11 @@ ul {
 .top-song,
 .top-5,
 .top-genre {
-  background: rgb(246, 89, 169);
+  background: rgb(22, 160, 133);
   background: linear-gradient(
     0deg,
-    rgba(246, 89, 169, 1) 0%,
-    rgba(133, 232, 255, 1) 100%
+    rgba(22, 160, 133, 1) 0%,
+    rgba(244, 208, 63, 1) 100%
   );
   border-radius: 15px;
   min-width: 30%;
@@ -76,4 +76,8 @@ img {
 
 ul li {
   list-style: none;
+}
+
+div {
+  font-size: 1.5rem;
 }
