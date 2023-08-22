@@ -17,6 +17,8 @@ if (!code) {
     console.log("User Profile:", profile);
     updateWelcomeMessage(profile);
     await fetchTopArtists(accessToken, timeRange);
+    await fetchTopSongs(accessToken, timeRange);
+    await updateTopGenreUI(accessToken, timeRange);
   } catch (error) {
     console.error("Error:", error);
   }
@@ -129,7 +131,101 @@ async function fetchTopArtists(token, timeRange) {
   }
 }
 
-// Update UI
+//Fetch Top Song for month
+
+async function fetchTopSongs(token, timeRange) {
+  try {
+    const result = await fetch(
+      `https://api.spotify.com/v1/me/top/tracks?time_range=${timeRange}`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    const topSongs = await result.json();
+    console.log(`Top Songs (${timeRange}):`, topSongs);
+
+    if (topSongs.items.length > 0) {
+      const numberOneTrack = topSongs.items[0];
+      const trackName = numberOneTrack.name;
+      const artistName = numberOneTrack.artists[0].name;
+      const trackImage = numberOneTrack.album.images[0]?.url;
+
+      // Update the DOM
+      const topSongImageElement = document.getElementById("top-song-image");
+      const topSongTextElement = document.getElementById("top-song-text");
+      const topSongNameElement = document.getElementById("top-song-name");
+
+      topSongImageElement.src = trackImage;
+      topSongTextElement.textContent = "You kept listening to";
+      topSongNameElement.textContent = `${trackName} by ${artistName}`;
+    } else {
+      console.log("No top tracks found for the specified time range.");
+    }
+
+    return topSongs;
+  } catch (error) {
+    console.error("Error fetching top tracks:", error);
+    return [];
+  }
+}
+
+// Top Genre
+async function fetchTopGenre(token, timeRange) {
+  try {
+    const result = await fetch(
+      `https://api.spotify.com/v1/me/top/artists?time_range=${timeRange}`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    const topArtists = await result.json();
+    console.log(`Top Artists (${timeRange}):`, topArtists);
+
+    const topGenres = topArtists.items.flatMap((artist) => artist.genres);
+    const topGenre = mostCommonItem(topGenres);
+    console.log(`Top Genre (${timeRange}):`, topGenre);
+
+    return topGenre;
+  } catch (error) {
+    console.error("Error fetching top genre:", error);
+    return "";
+  }
+}
+
+// Find the most common item in an array
+function mostCommonItem(arr) {
+  const counts = arr.reduce((acc, val) => {
+    acc[val] = (acc[val] || 0) + 1;
+    return acc;
+  }, {});
+  const mostCommon = Object.keys(counts).reduce((a, b) =>
+    counts[a] > counts[b] ? a : b
+  );
+  return mostCommon;
+}
+
+// Update UI with Top Genre
+async function updateTopGenreUI(token, timeRange) {
+  try {
+    const topGenre = await fetchTopGenre(token, timeRange);
+    const topGenreText = document.getElementById("top-genre-text");
+
+    if (topGenre) {
+      topGenreText.textContent = topGenre;
+    } else {
+      topGenreText.textContent =
+        "No top genre found for the specified time range.";
+    }
+  } catch (error) {
+    console.error("Error updating top genre UI:", error);
+  }
+}
+
+// Populate Welcome message
 
 async function updateWelcomeMessage(profile) {
   try {
