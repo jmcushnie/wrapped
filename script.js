@@ -12,8 +12,11 @@ if (!code) {
   try {
     const accessToken = await getAccessToken(clientId, code);
     const profile = await fetchProfile(accessToken);
+    const timeRange = "short_term";
     console.log("Access Token:", accessToken);
     console.log("User Profile:", profile);
+    updateWelcomeMessage(profile);
+    await fetchTopArtists(accessToken, timeRange);
   } catch (error) {
     console.error("Error:", error);
   }
@@ -88,4 +91,52 @@ async function fetchProfile(token) {
   });
 
   return await result.json();
+}
+
+// Fetch top artists for that month
+async function fetchTopArtists(token, timeRange) {
+  try {
+    const result = await fetch(
+      `https://api.spotify.com/v1/me/top/artists?time_range=${timeRange}`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    const topArtists = await result.json();
+    console.log(`Top Artists (${timeRange}):`, topArtists);
+
+    if (topArtists.items.length > 0) {
+      const numberOneArtist = topArtists.items[0];
+      const artistName = numberOneArtist.name;
+      const artistImage = numberOneArtist.images[0]?.url;
+
+      const topArtistNameElement = document.getElementById("top-artist-name");
+      const topArtistImageElement = document.getElementById("top-artist-image");
+
+      topArtistNameElement.textContent = artistName;
+      topArtistImageElement.src = artistImage;
+      topArtistImageElement.alt = `${artistName} image`;
+
+      const h2Element = document.querySelector(".top-artist h2");
+      h2Element.textContent = `Your favorite artist this month was ${artistName}`;
+    } else {
+      console.log("No top artists found for the specified time range.");
+    }
+  } catch (error) {
+    console.error("Error fetching top artists:", error);
+  }
+}
+
+// Update UI
+
+async function updateWelcomeMessage(profile) {
+  try {
+    const userName = profile.display_name;
+    const welcomeMessage = document.getElementById("welcome-message");
+    welcomeMessage.textContent = `Hi ${userName}, Welcome to your Spotify Wrapped`;
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+  }
 }
