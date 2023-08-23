@@ -1,29 +1,34 @@
-const clientId = import.meta.env.VITE_CLIENT_ID;
-const params = new URLSearchParams(window.location.search);
-const code = params.get("code");
-
-console.log(clientId);
-if (!code) {
-  console.log(
-    "No authorization code found. Redirecting to authorization flow."
-  );
-  redirectToAuthCodeFlow(clientId);
-} else {
+async function main() {
   try {
-    const accessToken = await getAccessToken(clientId, code);
-    const profile = await fetchProfile(accessToken);
-    const timeRange = "short_term";
-    console.log("Access Token:", accessToken);
-    console.log("User Profile:", profile);
-    updateWelcomeMessage(profile);
-    await fetchTopArtists(accessToken, timeRange);
-    await fetchTopSongs(accessToken, timeRange);
-    await updateTopGenreUI(accessToken, timeRange);
-    await fetchTop5Songs(accessToken, timeRange);
+    const clientId = import.meta.env.VITE_CLIENT_ID;
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
+
+    console.log(clientId);
+    if (!code) {
+      console.log(
+        "No authorization code found. Redirecting to authorization flow."
+      );
+      redirectToAuthCodeFlow(clientId);
+    } else {
+      const accessToken = await getAccessToken(clientId, code);
+      const profile = await fetchProfile(accessToken);
+      const timeRange = "short_term";
+      console.log("Access Token:", accessToken);
+      console.log("User Profile:", profile);
+      updateWelcomeMessage(profile);
+      await fetchTopArtists(accessToken, timeRange);
+      await fetchTopSongs(accessToken, timeRange);
+      await updateTopGenreUI(accessToken, timeRange);
+      await fetchTop5Songs(accessToken, timeRange);
+    }
   } catch (error) {
     console.error("Error:", error);
   }
 }
+
+// Call the main function to start the execution
+main();
 
 // Authorisation code flow Spotify using PKCE
 export async function redirectToAuthCodeFlow(clientId) {
